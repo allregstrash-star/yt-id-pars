@@ -1,0 +1,12 @@
+workflows:
+  android-build:
+    name: Android Build
+    instance_type: linux
+    
+    scripts:
+      - name: Build debug APK
+        script:
+          cd app
+          ./gradlew assembleDebug
+    artifacts:
+      - app/build/outputs/apk/debug/*.apk
