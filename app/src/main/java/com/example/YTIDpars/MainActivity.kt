@@ -1,17 +1,12 @@
 package com.example.YTiDPars
 
-import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.FileProvider
-import java.io.File
 import java.util.regex.Pattern
 
 class MainActivity : AppCompatActivity() {
@@ -27,25 +22,27 @@ class MainActivity : AppCompatActivity() {
         infoTextView = findViewById(R.id.infoTextView)
 
         pasteAndGoButton.setOnClickListener {
-            createAndOpenHtmlFromClipboard()
+            generateAndShowHtml()
         }
     }
 
-    private fun createAndOpenHtmlFromClipboard() {
+    private fun generateAndShowHtml() {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val pasteData = clipboard.primaryClip?.getItemAt(0)?.text?.toString().orEmpty()
 
         if (pasteData.isEmpty()) {
-            infoTextView.text = "Буфер обмена пуст!"
+            infoTextView.text = "Clipboard empty!"
             Toast.makeText(this, "Нечего вставлять", Toast.LENGTH_SHORT).show()
             return
         }
+        
+        Toast.makeText(this, "Read link: $pasteData", Toast.LENGTH_SHORT).show()
 
-        infoTextView.text = "Вставлено: $pasteData"
         val videoId = extractYouTubeId(pasteData)
 
         if (videoId == null) {
-            Toast.makeText(this, "Это не похоже на ссылку YouTube", Toast.LENGTH_LONG).show()
+            infoTextView.text = "can't extract yt ID video:\n$pasteData"
+            Toast.makeText(this, "can't pars yt link", Toast.LENGTH_LONG).show()
             return
         }
 
@@ -53,7 +50,7 @@ class MainActivity : AppCompatActivity() {
             <!DOCTYPE html>
             <html>
                 <head>
-                    <title>Фан-страница Яндекса</title>
+                    <title>TEST YTIDpars</title>
                 </head>
                 <body>
                     <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/$videoId" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
@@ -61,29 +58,8 @@ class MainActivity : AppCompatActivity() {
             </html>
         """.trimIndent()
 
-        try {
-            val appSpecificDir = getExternalFilesDir(null)
-            val file = File(appSpecificDir, "youtube_page_$videoId.html")
-            file.writeText(htmlContent)
-
-            Toast.makeText(this, "Файл сохранен! Открываю в браузере...", Toast.LENGTH_SHORT).show()
-            infoTextView.text = "HTML-файл для видео $videoId создан!"
-
-            // ----- НОВЫЙ БЛОК КОДА ДЛЯ ЗАПУСКА БРАУЗЕРА -----
-            val authority = "com.example.YTiDPars.fileprovider"
-            val fileUri: Uri = FileProvider.getUriForFile(this, authority, file)
-
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.setDataAndType(fileUri, "text/html")
-            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-
-            startActivity(intent)
-            // ----------------------------------------------
-
-        } catch (e: Exception) {
-            Toast.makeText(this, "Ошибка: ${e.message}", Toast.LENGTH_LONG).show()
-            e.printStackTrace()
-        }
+        infoTextView.text = htmlContent
+        Toast.makeText(this, "HTML built!", Toast.LENGTH_LONG).show()
     }
 
     private fun extractYouTubeId(youtubeUrl: String): String? {
