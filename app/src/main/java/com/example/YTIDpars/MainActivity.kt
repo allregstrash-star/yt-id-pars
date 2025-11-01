@@ -1,75 +1,58 @@
-package com.example.YTiDPars
+package com.example.ytembed;
 
-import android.content.ClipboardManager
-import android.content.Context
-import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import java.util.regex.Pattern
+import android.os.Bundle;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
-class MainActivity : AppCompatActivity() {
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
-    private lateinit var pasteAndGoButton: Button
-    private lateinit var infoTextView: TextView
+public class MainActivity extends AppCompatActivity {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+    private WebView webView;
 
-        pasteAndGoButton = findViewById(R.id.pasteAndGoButton)
-        infoTextView = findViewById(R.id.infoTextView)
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-        pasteAndGoButton.setOnClickListener {
-            generateAndShowHtml()
-        }
+        setContentView(R.layout.activity_main);
+        webView = findViewById(R.id.webView);
+
+        WebSettings s = webView.getSettings();
+        s.setJavaScriptEnabled(true);
+        s.setDomStorageEnabled(true);
+        s.setMediaPlaybackRequiresUserGesture(false); // разрешить autoplay если нужно
+        s.setAllowFileAccess(true);
+        s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+
+        webView.setWebViewClient(new WebViewClient());
+        webView.setWebChromeClient(new WebChromeClient());
+
+        String videoId = "dQw4w9WgXcQ";
+
+        String baseUrl = "http://localhost";
+
+        String html = "<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
+                + "<style>html,body{height:100%;margin:0;background:#000}iframe{position:absolute;left:0;top:0;width:100%;height:100%;border:0;}</style>"
+                + "</head><body>"
+                + "<iframe id=\"ytplayer\" "
+                + "src=\"https://www.youtube-nocookie.com/embed/" + videoId
+                + "?rel=0&origin=" + baseUrl + "\" "
+                + "referrerpolicy=\"strict-origin-when-cross-origin\" "
+                + "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>"
+                + "</body></html>";
+
+        webView.loadDataWithBaseURL(baseUrl, html, "text/html", "utf-8", null);
     }
 
-    private fun generateAndShowHtml() {
-        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val pasteData = clipboard.primaryClip?.getItemAt(0)?.text?.toString().orEmpty()
-
-        if (pasteData.isEmpty()) {
-            infoTextView.text = "Clipboard empty!"
-            Toast.makeText(this, "Нечего вставлять", Toast.LENGTH_SHORT).show()
-            return
+    @Override
+    protected void onDestroy() {
+        if (webView != null) {
+            webView.loadUrl("about:blank");
+            webView.destroy();
         }
-        
-        Toast.makeText(this, "Read link: $pasteData", Toast.LENGTH_SHORT).show()
-
-        val videoId = extractYouTubeId(pasteData)
-
-        if (videoId == null) {
-            infoTextView.text = "can't extract yt ID video:\n$pasteData"
-            Toast.makeText(this, "can't pars yt link", Toast.LENGTH_LONG).show()
-            return
-        }
-
-        val htmlContent = """
-            <!DOCTYPE html>
-            <html>
-                <head>
-                    <title>TEST YTIDpars</title>
-                </head>
-                <body>
-                    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/$videoId" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                </body>
-            </html>
-        """.trimIndent()
-
-        infoTextView.text = htmlContent
-        Toast.makeText(this, "HTML built!", Toast.LENGTH_LONG).show()
-    }
-
-    private fun extractYouTubeId(youtubeUrl: String): String? {
-        val pattern = "(?<=watch\\?v=|/videos/|embed\\/|youtu.be\\/|\\/v\\/|\\/e\\/|watch\\?v%3D|watch\\?feature=player_embedded&v=|%2Fvideos%2F|embed%2Fvideos%2F|youtu.be%2F|%2Fv%2F)[^#\\&\\?\\n]*"
-        val compiledPattern = Pattern.compile(pattern)
-        val matcher = compiledPattern.matcher(youtubeUrl)
-        return if (matcher.find()) {
-            matcher.group()
-        } else {
-            null
-        }
+        super.onDestroy();
     }
 }
