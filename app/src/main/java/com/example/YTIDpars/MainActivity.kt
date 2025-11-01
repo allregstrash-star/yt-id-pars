@@ -1,58 +1,62 @@
-package com.example.ytembed;
+package com.example.YTIDpars
 
-import android.os.Bundle;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.os.Bundle
+import android.webkit.WebChromeClient
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.appcompat.app.AppCompatActivity
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
+class MainActivity : AppCompatActivity() {
 
-public class MainActivity extends AppCompatActivity {
+    private lateinit var webView: WebView
 
-    private WebView webView;
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        webView = findViewById(R.id.webView)
 
-        setContentView(R.layout.activity_main);
-        webView = findViewById(R.id.webView);
+        val settings = webView.settings
+        settings.javaScriptEnabled = true
+        settings.domStorageEnabled = true
+        settings.mediaPlaybackRequiresUserGesture = false
+        settings.allowFileAccess = true
+        settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
 
-        WebSettings s = webView.getSettings();
-        s.setJavaScriptEnabled(true);
-        s.setDomStorageEnabled(true);
-        s.setMediaPlaybackRequiresUserGesture(false); // разрешить autoplay если нужно
-        s.setAllowFileAccess(true);
-        s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        webView.webViewClient = WebViewClient()
+        webView.webChromeClient = WebChromeClient()
 
-        webView.setWebViewClient(new WebViewClient());
-        webView.setWebChromeClient(new WebChromeClient());
+        val videoId = "dQw4w9WgXcQ" // можешь заменить на любое ID
+        val baseUrl = "https://localhost"
 
-        String videoId = "dQw4w9WgXcQ";
+        val html = """
+            <!doctype html>
+            <html>
+              <head>
+                <meta name="viewport" content="width=device-width,initial-scale=1">
+                <style>
+                  html,body{height:100%;margin:0;background:#000}
+                  iframe{position:absolute;left:0;top:0;width:100%;height:100%;border:0;}
+                </style>
+              </head>
+              <body>
+                <iframe id="ytplayer"
+                    src="https://www.youtube-nocookie.com/embed/$videoId?rel=0&origin=$baseUrl"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen>
+                </iframe>
+              </body>
+            </html>
+        """.trimIndent()
 
-        String baseUrl = "http://localhost";
-
-        String html = "<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
-                + "<style>html,body{height:100%;margin:0;background:#000}iframe{position:absolute;left:0;top:0;width:100%;height:100%;border:0;}</style>"
-                + "</head><body>"
-                + "<iframe id=\"ytplayer\" "
-                + "src=\"https://www.youtube-nocookie.com/embed/" + videoId
-                + "?rel=0&origin=" + baseUrl + "\" "
-                + "referrerpolicy=\"strict-origin-when-cross-origin\" "
-                + "allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>"
-                + "</body></html>";
-
-        webView.loadDataWithBaseURL(baseUrl, html, "text/html", "utf-8", null);
+        webView.loadDataWithBaseURL(baseUrl, html, "text/html", "utf-8", null)
     }
 
-    @Override
-    protected void onDestroy() {
-        if (webView != null) {
-            webView.loadUrl("about:blank");
-            webView.destroy();
-        }
-        super.onDestroy();
+    override fun onDestroy() {
+        webView.loadUrl("about:blank")
+        webView.destroy()
+        super.onDestroy()
     }
 }
