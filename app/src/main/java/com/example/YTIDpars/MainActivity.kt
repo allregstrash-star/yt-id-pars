@@ -21,11 +21,9 @@ class MainActivity : AppCompatActivity() {
         val settings = webView.settings
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
-        settings.mediaPlaybackRequiresUserGesture = false
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-        settings.safeBrowsingEnabled = false
         settings.userAgentString =
-            "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36"
+            "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36"
 
         webView.webChromeClient = WebChromeClient()
         webView.webViewClient = object : WebViewClient() {
@@ -35,15 +33,14 @@ class MainActivity : AppCompatActivity() {
             ): Boolean = false
         }
 
-        // версия
-        val versionLabel = "v0.3.006"
+        val versionLabel = "v0.3.007"
 
         val html = """
             <!DOCTYPE html>
             <html>
               <head>
                 <meta charset="utf-8">
-                <title>YouTube Embed $versionLabel</title>
+                <title>YouTube Embed Test $versionLabel</title>
                 <meta name="viewport" content="width=device-width,initial-scale=1">
                 <style>
                   body {
@@ -56,34 +53,48 @@ class MainActivity : AppCompatActivity() {
                     justify-content: center;
                     height: 100vh;
                     font-family: sans-serif;
+                    text-align: center;
                   }
-                  h2 { margin: 8px 0 16px 0; font-size: 20px; }
-                  .player {
+                  h2 { margin: 10px 0 20px 0; font-size: 22px; }
+                  .preview {
+                    position: relative;
                     width: 90vw;
-                    height: 50vw;
                     max-width: 640px;
-                    max-height: 360px;
-                    border-radius: 12px;
+                    border-radius: 14px;
                     overflow: hidden;
-                    box-shadow: 0 0 30px rgba(0,255,100,0.12);
+                    box-shadow: 0 0 25px rgba(0,255,100,0.2);
                   }
-                  iframe { width:100%; height:100%; border:0; display:block; background:#111; }
+                  img {
+                    width: 100%;
+                    display: block;
+                  }
+                  button {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0,255,50,0.9);
+                    border: none;
+                    border-radius: 50%;
+                    width: 70px;
+                    height: 70px;
+                    color: #000;
+                    font-size: 24px;
+                    font-weight: bold;
+                    box-shadow: 0 0 15px rgba(0,255,0,0.6);
+                  }
                 </style>
               </head>
               <body>
                 <h2>🎬 YouTube Embed $versionLabel</h2>
-                <div class="player">
-                  <iframe
-                    src="https://www.youtube.com/embed/dQw4w9WgXcQ?modestbranding=1&rel=0"
-                    referrerpolicy="strict-origin-when-cross-origin"
-                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowfullscreen>
-                  </iframe>
+                <div class="preview">
+                  <img src="https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg" alt="Preview">
+                  <button onclick="alert('🎥 Видео не загружается из-за ограничений WebView')">▶</button>
                 </div>
               </body>
             </html>
         """.trimIndent()
 
-        webView.loadDataWithBaseURL("https://www.youtube.com", html, "text/html", "utf-8", null)
+        webView.loadDataWithBaseURL(null, html, "text/html", "utf-8", null)
     }
 }
