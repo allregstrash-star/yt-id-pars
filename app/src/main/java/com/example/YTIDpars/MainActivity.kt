@@ -1,9 +1,14 @@
 package com.example.YTIDpars
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
+import android.view.Gravity
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -11,63 +16,49 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
-        val webView = findViewById<WebView>(R.id.webView)
-        webView.settings.javaScriptEnabled = true
-        webView.settings.domStorageEnabled = true
+        val rootLayout = FrameLayout(this)
+        rootLayout.setBackgroundColor(Color.BLACK)
+
+        val titleView = TextView(this).apply {
+            text = "🎬 YouTube Embed v0.3.002"
+            setTextColor(Color.GREEN)
+            textSize = 18f
+            setPadding(16, 32, 16, 16)
+            gravity = Gravity.CENTER_HORIZONTAL
+        }
+
+        val webView = WebView(this)
+        val settings: WebSettings = webView.settings
+        settings.javaScriptEnabled = true
+        settings.domStorageEnabled = true
         webView.webViewClient = WebViewClient()
 
-        // 🔹 Версия приложения (меняй при каждом билде, чтобы проверять обновление)
-        val versionLabel = "v0.3.001"
-
-        // 🔸 HTML код для отображения плеера и версии
+        val videoId = "dQw4w9WgXcQ"
         val html = """
-            <!DOCTYPE html>
-            <html lang="ru">
-            <head>
-              <meta charset="UTF-8">
-              <title>YouTube Embed Test $versionLabel</title>
-              <style>
-                body {
-                  margin: 0;
-                  background-color: #000;
-                  color: #fff;
-                  display: flex;
-                  flex-direction: column;
-                  align-items: center;
-                  justify-content: center;
-                  height: 100vh;
-                  font-family: sans-serif;
-                }
-                h2 {
-                  margin-bottom: 20px;
-                  font-size: 1.2rem;
-                  color: #0f0;
-                }
-                iframe {
-                  width: 90vw;
-                  height: 50vw;
-                  max-width: 560px;
-                  max-height: 315px;
-                  border: none;
-                  border-radius: 12px;
-                  box-shadow: 0 0 20px rgba(0,255,0,0.3);
-                }
-              </style>
-            </head>
-            <body>
-              <h2>🎬 YouTube Embed $versionLabel</h2>
-              <iframe 
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowfullscreen>
-              </iframe>
-            </body>
+            <html>
+                <body style="margin:0; background-color:black;">
+                    <iframe width="100%" height="100%"
+                        src="https://www.youtube.com/embed/$videoId?autoplay=1&modestbranding=1"
+                        frameborder="0" allowfullscreen>
+                    </iframe>
+                </body>
             </html>
         """.trimIndent()
 
-        // 🧩 Загружаем HTML в WebView
         webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
+
+        // Добавляем элементы в контейнер
+        rootLayout.addView(webView, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        ))
+
+        rootLayout.addView(titleView, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT
+        ))
+
+        setContentView(rootLayout)
     }
 }
