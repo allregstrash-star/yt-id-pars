@@ -3,7 +3,6 @@
 
     <application
         android:label="YT ID Pars"
-        android:icon="@mipmap/ic_launcher"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity android:name=".MainActivity"
             android:exported="true">
