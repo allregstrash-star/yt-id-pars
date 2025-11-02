@@ -1,14 +1,12 @@
 package com.example.YTIDpars
 
 import android.annotation.SuppressLint
-import android.graphics.Color
 import android.os.Bundle
-import android.view.Gravity
+import android.webkit.WebChromeClient
+import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.FrameLayout
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -17,48 +15,76 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val rootLayout = FrameLayout(this)
-        rootLayout.setBackgroundColor(Color.BLACK)
-
-        val titleView = TextView(this).apply {
-            text = "🎬 YouTube Embed v0.3.002"
-            setTextColor(Color.GREEN)
-            textSize = 18f
-            setPadding(16, 32, 16, 16)
-            gravity = Gravity.CENTER_HORIZONTAL
-        }
-
         val webView = WebView(this)
-        val settings: WebSettings = webView.settings
+        setContentView(webView)
+
+        val settings = webView.settings
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
-        webView.webViewClient = WebViewClient()
+        settings.mediaPlaybackRequiresUserGesture = false
+        settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+        // Отключаем safe browsing, чтобы WebView не блокировал встраиваемые iframe (тестовый режим)
+        settings.safeBrowsingEnabled = false
 
-        val videoId = "dQw4w9WgXcQ"
+        webView.webChromeClient = WebChromeClient()
+        webView.webViewClient = object : WebViewClient() {
+            override fun shouldOverrideUrlLoading(
+                view: WebView?,
+                request: WebResourceRequest?
+            ): Boolean {
+                return false
+            }
+        }
+
+        // === версия (меняй при следующих билдах) ===
+        val versionLabel = "v0.3.005"
+
         val html = """
+            <!DOCTYPE html>
             <html>
-                <body style="margin:0; background-color:black;">
-                    <iframe width="100%" height="100%"
-                        src="https://www.youtube.com/embed/$videoId?autoplay=1&modestbranding=1"
-                        frameborder="0" allowfullscreen>
-                    </iframe>
-                </body>
+              <head>
+                <meta charset="utf-8">
+                <title>YouTube Embed $versionLabel</title>
+                <meta name="viewport" content="width=device-width,initial-scale=1">
+                <style>
+                  body {
+                    margin: 0;
+                    background-color: #000;
+                    color: #00ff56;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh;
+                    font-family: sans-serif;
+                  }
+                  h2 { margin: 8px 0 16px 0; font-size: 20px; }
+                  .player {
+                    width: 90vw;
+                    height: 50vw;
+                    max-width: 640px;
+                    max-height: 360px;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    box-shadow: 0 0 30px rgba(0,255,100,0.12);
+                  }
+                  iframe { width:100%; height:100%; border:0; display:block; }
+                </style>
+              </head>
+              <body>
+                <h2>🎬 YouTube Embed $versionLabel</h2>
+                <div class="player">
+                  <iframe
+                    src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&modestbranding=1"
+                    title="YouTube video player"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen>
+                  </iframe>
+                </div>
+              </body>
             </html>
         """.trimIndent()
 
-        webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
-
-        // Добавляем элементы в контейнер
-        rootLayout.addView(webView, FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.MATCH_PARENT
-        ))
-
-        rootLayout.addView(titleView, FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
-            FrameLayout.LayoutParams.WRAP_CONTENT
-        ))
-
-        setContentView(rootLayout)
+        webView.loadDataWithBaseURL(null, html, "text/html", "utf-8", null)
     }
 }
