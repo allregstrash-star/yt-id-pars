@@ -23,21 +23,20 @@ class MainActivity : AppCompatActivity() {
         settings.domStorageEnabled = true
         settings.mediaPlaybackRequiresUserGesture = false
         settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
-        // Отключаем safe browsing, чтобы WebView не блокировал встраиваемые iframe (тестовый режим)
         settings.safeBrowsingEnabled = false
+        settings.userAgentString =
+            "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36"
 
         webView.webChromeClient = WebChromeClient()
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
                 view: WebView?,
                 request: WebResourceRequest?
-            ): Boolean {
-                return false
-            }
+            ): Boolean = false
         }
 
-        // === версия (меняй при следующих билдах) ===
-        val versionLabel = "v0.3.005"
+        // версия
+        val versionLabel = "v0.3.006"
 
         val html = """
             <!DOCTYPE html>
@@ -68,16 +67,16 @@ class MainActivity : AppCompatActivity() {
                     overflow: hidden;
                     box-shadow: 0 0 30px rgba(0,255,100,0.12);
                   }
-                  iframe { width:100%; height:100%; border:0; display:block; }
+                  iframe { width:100%; height:100%; border:0; display:block; background:#111; }
                 </style>
               </head>
               <body>
                 <h2>🎬 YouTube Embed $versionLabel</h2>
                 <div class="player">
                   <iframe
-                    src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=1&modestbranding=1"
-                    title="YouTube video player"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    src="https://www.youtube.com/embed/dQw4w9WgXcQ?modestbranding=1&rel=0"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowfullscreen>
                   </iframe>
                 </div>
@@ -85,6 +84,6 @@ class MainActivity : AppCompatActivity() {
             </html>
         """.trimIndent()
 
-        webView.loadDataWithBaseURL(null, html, "text/html", "utf-8", null)
+        webView.loadDataWithBaseURL("https://www.youtube.com", html, "text/html", "utf-8", null)
     }
 }
