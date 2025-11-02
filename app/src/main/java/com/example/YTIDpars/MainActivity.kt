@@ -2,7 +2,6 @@ package com.example.YTIDpars
 
 import android.os.Bundle
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -11,20 +10,30 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val webView: WebView = findViewById(R.id.webView)
-        webView.webViewClient = WebViewClient()
+
+        // Включаем базовые настройки
         webView.settings.javaScriptEnabled = true
 
-        // 🔹 Тестовый iframe без всякой логики — просто проверить загрузку
+        // Просто отображаем локальный HTML
         val html = """
             <html>
-              <body style="margin:0;padding:0;background:black;">
-                <iframe 
-                  width="100%" 
-                  height="100%" 
-                  src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-                  frameborder="0" 
-                  allowfullscreen>
-                </iframe>
+              <head>
+                <meta charset="utf-8">
+                <style>
+                  body {
+                    background-color: #121212;
+                    color: white;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                    font-family: sans-serif;
+                    font-size: 24px;
+                  }
+                </style>
+              </head>
+              <body>
+                ✅ <b>WebView работает!</b>
               </body>
             </html>
         """.trimIndent()
