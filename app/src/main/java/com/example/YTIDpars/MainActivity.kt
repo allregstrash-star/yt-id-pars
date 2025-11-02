@@ -1,7 +1,9 @@
 package com.example.YTIDpars
 
 import android.os.Bundle
+import android.webkit.WebChromeClient
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -11,33 +13,35 @@ class MainActivity : AppCompatActivity() {
 
         val webView: WebView = findViewById(R.id.webView)
 
-        // Включаем базовые настройки
         webView.settings.javaScriptEnabled = true
+        webView.settings.domStorageEnabled = true
+        webView.settings.mediaPlaybackRequiresUserGesture = false
 
-        // Просто отображаем локальный HTML
+        // Эти две строки — важны для YouTube:
+        webView.webViewClient = WebViewClient()
+        webView.webChromeClient = WebChromeClient()
+
         val html = """
             <html>
-              <head>
-                <meta charset="utf-8">
-                <style>
-                  body {
-                    background-color: #121212;
-                    color: white;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                    font-family: sans-serif;
-                    font-size: 24px;
-                  }
-                </style>
-              </head>
-              <body>
-                ✅ <b>WebView работает!</b>
+              <body style="margin:0;padding:0;background:black;">
+                <iframe 
+                  width="100%" 
+                  height="100%" 
+                  src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1"
+                  frameborder="0" 
+                  allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                  allowfullscreen>
+                </iframe>
               </body>
             </html>
         """.trimIndent()
 
-        webView.loadDataWithBaseURL(null, html, "text/html", "utf-8", null)
+        webView.loadDataWithBaseURL(
+            "https://www.youtube.com",
+            html,
+            "text/html",
+            "utf-8",
+            null
+        )
     }
 }
